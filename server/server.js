@@ -53,14 +53,12 @@ conn.once('open', function() {
             console.log("I got here");
             var trails = new Trails();
             trails.name = req.body.name;
-            trails.longitude = 0;
-            trails.latitude = 0;
-            trails.distance = 0;
-            trails.time = 0;
-            trails.time = 0;
-            trails.Likes = 0;
-            trails.markers = 0;
-            trails.picture = "";
+            trails.longitude = req.body.longitude;
+            trails.latitude = req.body.latitude;
+            trails.distance = req.body.distance;
+            trails.time = req.body.time;
+            trails.likes = req.body.likes;
+            trails.markers = req.body.markers;
             console.log(trails);
             console.log(trails.name);
 
@@ -95,7 +93,7 @@ conn.once('open', function() {
 
         .put(function(req, res) {
             console.log("Hello!");
-            Trails.findById(req.param.trail_id, function(error, trails) {
+            Trails.findById(req.params.trail_id, function(err, trails) {
                 if(err)
                     res.send(err)
 
