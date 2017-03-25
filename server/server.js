@@ -72,6 +72,15 @@ conn.once('open', function() {
                     res.json({message: 'Trail created!'});
             });
 
+        })
+
+        .get(function(req, res) {
+            Trails.find(function(err, trails) {
+                if(err)
+                    res.send(err);
+                
+                res.json(trails);
+            });
         });
 
         // REGISTER OUR ROUTES -------------------------------
