@@ -2,7 +2,6 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var TrailSchema = new Schema({
-    _id: Number,
     name: String,
     longitude: Number,
     latitude: Number,
