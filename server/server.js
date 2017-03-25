@@ -85,21 +85,29 @@ conn.once('open', function() {
 
     router.route('/trails/:trail_id')
 
+        .get(function(req, res){
+            Trails.findById(req.params.trail_id, function(err, trails){
+                if (err)
+                    res.send(err);
+                res.json(trails);
+            });
+        })
+
         .put(function(req, res) {
             console.log("Hello!");
-            Trail.findById(req.param.trail_id, function(error, trail) {
+            Trails.findById(req.param.trail_id, function(error, trails) {
                 if(err)
                     res.send(err)
 
-                trail.name = req.body.name;
-                trail.longitude = req.body.longitude;
-                trail.latitude = req.body.latitude;
-                trail.distance = req.body.distance;
-                trail.time = req.body.time;
-                trail.likes = req.body.likes;
-                trail.markers = req.body.markers;
+                trails.name = req.body.name;
+                trails.longitude = req.body.longitude;
+                trails.latitude = req.body.latitude;
+                trails.distance = req.body.distance;
+                trails.time = req.body.time;
+                trails.likes = req.body.likes;
+                trails.markers = req.body.markers;
                 
-                trail.save(function(err){
+                trails.save(function(err){
                     if(err) 
                         res.send(err);
 
