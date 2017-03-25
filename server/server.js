@@ -8,6 +8,7 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var Trails     = require('./app/models/trails');
+var boundaries = require('./app/modules/boundaries')
 
 //Set up mongoose connection
 var mongoose = require('mongoose');
@@ -76,7 +77,8 @@ conn.once('open', function() {
             Trails.find({}, {name:1, longitude:1, latitude:1}, function(err, trails) {
                 if(err)
                     res.send(err);
-                
+
+                console.log(boundaries);
                 res.json(trails);
             });
         });
@@ -92,7 +94,6 @@ conn.once('open', function() {
         })
 
         .put(function(req, res) {
-            console.log("Hello!");
             Trails.findById(req.params.trail_id, function(err, trails) {
                 if(err)
                     res.send(err)
@@ -112,6 +113,16 @@ conn.once('open', function() {
                     res.json({message: 'Trail updated!'});
                 });
             });
+        });
+
+    router.route('/boundaries')
+
+        .post(function(req, res){
+            boundaries.longbot = req.body.longbot;
+            boundaries.longtop = req.body.longtop;
+            boundaries.latbot = req.body.latbot;
+            boundaries.lattop = req.body.lattop;
+            res.json({message: 'Boudaries set!'});
         });
 
         // REGISTER OUR ROUTES -------------------------------
