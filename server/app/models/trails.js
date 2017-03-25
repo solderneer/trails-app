@@ -8,9 +8,10 @@ var TrailSchema = new Schema({
     latitude: Number,
     distance: Number,
     time: Number,
-    Likes: Number,
+    likes: Number,
     markers: Number,
     picture: String
 });
 
 module.exports = mongoose.model('Trails', TrailSchema);
+
