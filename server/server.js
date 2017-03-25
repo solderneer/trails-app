@@ -83,6 +83,31 @@ conn.once('open', function() {
             });
         });
 
+    router.route('/trails/:trail_id')
+
+        .put(function(req, res) {
+            console.log("Hello!");
+            Trail.findById(req.param.trail_id, function(error, trail) {
+                if(err)
+                    res.send(err)
+
+                trail.name = req.body.name;
+                trail.longitude = req.body.longitude;
+                trail.latitude = req.body.latitude;
+                trail.distance = req.body.distance;
+                trail.time = req.body.time;
+                trail.likes = req.body.likes;
+                trail.markers = req.body.markers;
+                
+                trail.save(function(err){
+                    if(err) 
+                        res.send(err);
+
+                    res.json({message: 'Trail updated!'});
+                });
+            });
+        });
+
         // REGISTER OUR ROUTES -------------------------------
         // all of our routes will be prefixed with /api
         app.use('/api', router);
