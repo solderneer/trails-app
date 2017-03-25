@@ -73,7 +73,7 @@ conn.once('open', function() {
         })
 
         .get(function(req, res) {
-            Trails.find(function(err, trails) {
+            Trails.find({}, {name:1, longitude:1, latitude:1}, function(err, trails) {
                 if(err)
                     res.send(err);
                 
