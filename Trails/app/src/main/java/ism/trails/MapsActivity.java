@@ -50,7 +50,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCameraMoveListener, LocationListener {
+public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapReadyCallback, GoogleMap.OnCameraMoveListener, LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap;
 
@@ -257,6 +257,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 			prevMinLat = minLat;
 			prevMinLong = minLong;
 		}
+	}
+	
+	@Override
+	public boolean onMarkerClick(final Marker marker) {
+		String id = (String) marker.getTag();
+		
+		
+		
+		return true;
+	}
+	
+	@Override
+	public void onMapClick(LatLng point) {
+		LinearLayout root = (LinearLayout) findViewById(R.id.view_ui);
+		root.setVisibility(INVISIBLE);
 	}
 
     private void enableMyLocation() {
