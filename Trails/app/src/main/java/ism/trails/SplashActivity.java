@@ -1,4 +1,4 @@
-package ism.trails.trails;
+package ism.trails;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -11,9 +11,9 @@ public class SplashActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-    // Example of a call to a native method
-    TextView tv = (TextView) findViewById(R.id.sample_text);
-    tv.setText(stringFromJNI());
+        // Example of a call to a native method
+        TextView tv = (TextView) findViewById(R.id.sample_text);
+        tv.setText(stringFromJNI());
     }
 
     /**

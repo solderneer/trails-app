@@ -2,8 +2,7 @@
 #include <string>
 
 extern "C"
-jstring
-Java_ism_trails_trails_SplashActivity_stringFromJNI(
+jstring Java_ism_trails_SplashActivity_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) {
     std::string hello = "Hello from C++";

@@ -1,0 +1,94 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="ism.trails.MapsActivity"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/activity_maps"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TabHost
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <LinearLayout
+                        android:id="@+id/explore"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:onClick="showExplore">
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/search"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:onClick="showSearch">
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/make"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:onClick="showMake"
+                        android:layout_gravity="bottom|center_horizontal">
+
+                    </LinearLayout>
+                </FrameLayout>
+            </LinearLayout>
+        </TabHost>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/view_ui"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_alignBottom="@id/activity_maps"
+        android:gravity="bottom|center_horizontal">
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="TextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView2" />
+        </GridLayout>
+    </LinearLayout>
+
+    <com.google.android.gms.maps.MapView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/map" />
+
+</RelativeLayout>
