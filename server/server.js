@@ -9,7 +9,6 @@ var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var Trails     = require('./app/models/trails');
 var Points     = require('./app/models/points')
-var boundaries = require('./app/modules/boundaries')
 
 //Set up mongoose connection
 var mongoose = require('mongoose');
@@ -55,13 +54,15 @@ conn.once('open', function() {
             console.log("I got here");
             var trails = new Trails();
             trails.name = req.body.name;
-            trials.route = req.body.route;
+            trails.route = req.body.route;
             trails.distance = req.body.distance;
             trails.time = req.body.time;
             trails.likes = req.body.likes;
             trails.markers = req.body.markers;
             trails.picture = req.body.picture;
             trails.description = req.body.description;
+            trails.latitude = req.body.latitude;
+            trails.longitude = req.body.longitude;
             console.log(trails);
             console.log(trails.name);
 
@@ -84,6 +85,35 @@ conn.once('open', function() {
             });
         });
 
+    router.route('/trails/restricted')
+
+        .get(function(req, res){
+           longbot = req.query.longbot;
+           longtop = req.query.longtop;
+           latbot = req.query.latbot;
+           lattop = req.query.lattop;
+
+           Trails.find({}, 'latitude longitude', function(err, trails) {
+                var response = [];
+                if(err)
+                    res.send(err);
+                
+                for(i = 0; i < trails.length; i++){
+                    console.log(i);
+                    var bool = trails[i].longitude > longbot && trails[i].latitude > latbot && trails[i].longitude < longtop && trails[i].latitude < lattop;
+                    console.log(bool);
+                    if(trails[i].longitude > longbot && trails[i].latitude > latbot && trails[i].longitude < longtop && trails[i].latitude < lattop){
+                        console.log("Hey");
+                        response.push(trails[i]);
+                    }
+                }
+
+                res.json(response);
+            });
+
+
+        });
+
     router.route('/trails/:trail_id')
 
         .get(function(req, res){
@@ -100,13 +130,15 @@ conn.once('open', function() {
                     res.send(err)
 
                 trails.name = req.body.name;
-                trials.route = req.body.route;
+                trails.route = req.body.route;
                 trails.distance = req.body.distance;
                 trails.time = req.body.time;
                 trails.likes = req.body.likes;
                 trails.markers = req.body.markers;
                 trails.picture = req.body.picture;
                 trails.description = req.body.description;
+                trails.latitude = req.body.latitude;
+                trails.longitude = req.body.longitude;
                 
                 trails.save(function(err){
                     if(err) 
@@ -115,16 +147,6 @@ conn.once('open', function() {
                     res.json({message: 'Trail updated!'});
                 });
             });
-        });
-
-    router.route('/boundaries')
-
-        .post(function(req, res){
-            boundaries.longbot = req.body.longbot;
-            boundaries.longtop = req.body.longtop;
-            boundaries.latbot = req.body.latbot;
-            boundaries.lattop = req.body.lattop;
-            res.json({message: 'Boudaries set!'});
         });
 
     router.route('/points')
