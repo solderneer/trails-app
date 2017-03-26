@@ -93,6 +93,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+	private enum State{explore, search, make};
+	private State state;
+	
     private void showExplore() {
         highlightTab(R.id.explore);
         LinearLayout root = (LinearLayout) findViewById(R.id.view_ui);
@@ -153,6 +156,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		infoView.addChildren(otherView);
 		
 		root.addChildren(infoView);
+		
+		state = explore;
     }
 
     private void highlightTab(int tabId) {
