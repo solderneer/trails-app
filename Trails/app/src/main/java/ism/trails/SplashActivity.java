@@ -1,6 +1,7 @@
 package ism.trails;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -14,6 +15,9 @@ public class SplashActivity extends Activity {
         // Example of a call to a native method
         TextView tv = (TextView) findViewById(R.id.sample_text);
         tv.setText(stringFromJNI());
+
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
     }
 
     /**

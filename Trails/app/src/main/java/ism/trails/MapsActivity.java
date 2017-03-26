@@ -5,27 +5,36 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Paint;
 import android.location.Location;
 import android.location.LocationListener;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.util.Pair;
+import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
@@ -42,15 +51,24 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.VisibleRegion;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapReadyCallback, GoogleMap.OnCameraMoveListener, LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
+import static android.view.View.VISIBLE;
+import static ism.trails.R.id.map;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnCameraChangeListener, LocationListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap;
 
@@ -72,7 +90,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        MapView mapView = (MapView) findViewById(R.id.map);
+        MapView mapView = (MapView) findViewById(map);
         mapView.getMapAsync(this);
 
         showExplore();
@@ -90,7 +108,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
         exploreId.put("nameView", 3);
         exploreId.put("descriptionView", 4);
         exploreId.put("imageView", 5);
-        exploreId.put("otherData", 6);
+        exploreId.put("otherView", 6);
     }
 
 
@@ -100,7 +118,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
     private void showExplore() {
         highlightTab(R.id.explore);
         LinearLayout root = (LinearLayout) findViewById(R.id.view_ui);
-		root.setVisibility(INVISIBLE);
+		root.setVisibility(View.INVISIBLE);
         root.removeAllViews();
 
         Button goButton = new Button(this);
@@ -108,56 +126,52 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
         goButton.setBackgroundColor(getColor(R.color.colorPrimary));
         goButton.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT));
         goButton.setText("Go");
-        goButton.setTextSize(getResources().getDimension(R.dimen.buttonSize);
+        //goButton.setTextSize(getResources().getDimension(R.dimen.buttonSize);
 		
-		root.addChildren(goButton);
+		root.addView(goButton);
 
         LinearLayout infoView = new LinearLayout(this);
 		infoView.setId(exploreId.get("infoView"));
 		infoView.setOrientation(LinearLayout.VERTICAL);
 		infoView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-		
-		TextView otherData = new TextView(this);
-		otherData.setId(exploreId.get("otherData"));
-		infoView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-		
+
 		LinearLayout hBox = new LinearLayout(this);
 		hBox.setOrientation(LinearLayout.HORIZONTAL);
 		hBox.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 		
 		LinearLayout vBox = new LinearLayout(this);
 		vBox.setOrientation(LinearLayout.VERTICAL);
-		vBoxView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+		vBox.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 		
 		TextView nameView = new TextView(this);
 		nameView.setId(exploreId.get("nameView"));
-		nameView.setTextSize(getResources().getDimension(R.dimen.titleSize));
-		
-		vBox.addChildren(nameView);
+		//nameView.setTextSize(getResources().getDimension(R.dimen.titleSize));
+
+		vBox.addView(nameView);
 		
 		TextView descriptionView = new TextView(this);
 		descriptionView.setId(exploreId.get("descriptionView"));
-		descriptionView.setTextSize(getResources().getDimension(R.dimen.textSize));
+		//descriptionView.setTextSize(getResources().getDimension(R.dimen.textSize));
 		
-		vBox.addChildren(descriptionView);
+		vBox.addView(descriptionView);
 		
-		hBox.addChildren(vBox);
+		hBox.addView(vBox);
 		
-		ImageView image = new ImageView(this);
-		imageView.setId(exploreId.get("imageView");
+		ImageView imageView = new ImageView(this);
+		imageView.setId(exploreId.get("imageView"));
 		imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 		
-		hBox.addChildren(image);
+		hBox.addView(imageView);
 		
-		infoView.addChildren(hBox);
+		infoView.addView(hBox);
 		
 		TextView otherView = new TextView(this);
 		otherView.setId(exploreId.get("otherView"));
-		otherView.setTextColor(getColor(R.id.fadeColor));
+		//otherView.setTextColor(getColor(R.id.fadeColor));
 		
-		infoView.addChildren(otherView);
+		infoView.addView(otherView);
 		
-		root.addChildren(infoView);
+		root.addView(infoView);
 		
 		state = State.explore;
     }
@@ -166,7 +180,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
         int tabs[] = {R.id.explore, R.id.search, R.id.make};
         for (int tab : tabs) {
             LinearLayout tabView = (LinearLayout) findViewById(tab);
-            tabView.setBackgroundColor(getColor(R.color.colorPrimaryDark));
+            tabView.setBackgroundColor(getColor(R.color.colorPrimary));
         }
         LinearLayout tabView = (LinearLayout) findViewById(tabId);
         tabView.setBackgroundColor(getColor(R.color.colorPrimaryDark));
@@ -185,23 +199,23 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-		mMap.
+		//mMap.
 
         enableMyLocation();
     }
 	
 	double prevMaxLat = 0, prevMinLat = 0, prevMaxLong = 0, prevMinLong = 0;
 	@Override
-	public void onCameraMove() {
+	public void onCameraChange(CameraPosition cameraPosition) {
 		if (state == State.explore && prevMaxLat != 0) {
 			RequestQueue queue = Volley.newRequestQueue(this);
 			VisibleRegion vr = mMap.getProjection().getVisibleRegion();
 			LatLng farLeft = vr.farLeft;
 			LatLng nearRight = vr.nearRight;
-			double maxLat = max(farLeft.latitude, nearRight.latitude);
-			double minLat = min(farLeft.latitude, nearRight.latitude);
-			double maxLong = max(farLeft.longitude, nearRight.longitude);
-			double minLong = min(farLeft.longitude, nearRight.longitude);
+			double maxLat = Math.max(farLeft.latitude, nearRight.latitude);
+			double minLat = Math.min(farLeft.latitude, nearRight.latitude);
+			double maxLong = Math.max(farLeft.longitude, nearRight.longitude);
+			double minLong = Math.min(farLeft.longitude, nearRight.longitude);
 			
 			if (maxLat < prevMaxLat || maxLong < prevMaxLong || minLat > prevMinLat || minLong > prevMinLong) {
 				return;
@@ -223,23 +237,28 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
 
 			// Request a string response from the provided URL.
 
-			JsonArrayRequest stringRequest = new JsonArrayRequest(url, new JSONArray(),
+			JsonArrayRequest stringRequest = new JsonArrayRequest(url,
 				new Response.Listener<JSONArray>() {
 					@Override
 					public void onResponse(JSONArray response) {
 						//reponse is a list of trailObjects
 						
 						for (int i = 0; i < response.length(); i++) {
-							JSONObject trail = reponse.get(i);
-							if (trailMarkers.getOrDefault(trail.getString("id"), null) == null) {
-								trailMakers.put(trail.getString("id"), new LatLng(trail.getDouble("latitude"), trail.getDouble("longitude")));
-								
-								Marker marker = map.addMarker(new MarkerOptions()
-									.position(new LatLng(trail.getDouble("latitude"), trail.getDouble("longitude")))
-								)
-								marker.setTag(trail.getString("id"));
-								
-							}
+                            JSONObject trail = null;
+                            try {
+                                trail = response.getJSONObject(i);
+                                if (!trailMarkers.containsKey(trail.getString("id"))) {
+                                    trailMarkers.put(trail.getString("id"), new LatLng(trail.getDouble("latitude"), trail.getDouble("longitude")));
+
+                                    Marker marker = mMap.addMarker(new MarkerOptions()
+                                            .position(new LatLng(trail.getDouble("latitude"), trail.getDouble("longitude")))
+                                    );
+                                    marker.setTitle(trail.getString("id"));
+
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
 						}
 					}
 				}, new Response.ErrorListener() {
@@ -262,59 +281,68 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
 	
 	@Override
 	public boolean onMarkerClick(final Marker marker) {
-		String id = (String) marker.getTag();
+		final String id = marker.getTitle();
 		
 		String url = "https://trails.sudharshan.makerforce.io/trails/" + id;
 
 		// Request a string response from the provided URL.
 
+        final FragmentActivity t = this;
+
+        RequestQueue queue = Volley.newRequestQueue(this);
 		JsonObjectRequest stringRequest = new JsonObjectRequest(url, new JSONObject(),
 			new Response.Listener<JSONObject>() {
-				
-				final String fid = id;
+
 				@Override
 				public void onResponse(JSONObject response) {
 					//reponse is a trailObjects
-					
-					clickButton.setOnClickListener( new OnClickListener() {
 
-						@Override
-						public void onClick(View v) {
-							// TODO Auto-generated method stub
-							
-						}
-					}
-				);
-				
-				LinearLayout root = (LinearLayout) findViewById(R.id.view_ui);
-	
-				TextView nameView = (TextView) root.findViewById(exploreId.get("nameView"));
-				nameView.setText(response.getString("name"));
-				
-				TextView descriptionView = (TextView) root.findViewById(exploreId.get("descriptionView"));
-				descriptionView.setText(response.getString("description"));
-				
-				new DownloadImageTask((ImageView) root.findViewById(exploreId.get("imageView")));
-					.execute("https://trails.sudharshan.makerforce.io/assets/" + reponse.getString("picture"));
-				
-				TextView otherView = (TextView) root.findViewById(exploreId.get("otherView"));
-					long rawTime = response.getDouble("time");
-					String time = "";
-					if (rawTime / 3600 != 0) {
-						time += (rawTime/3600) + "h ";
-						if (rawTime / 60 != 0) {
-							time += (rawTime/60) + "m " ;
-						}
-					}
-					else {
-						if (rawTime / 60 != 0) {
-							time += (rawTime/60) + "m " ;
-						}
-						time += (rawTime % 60) + "s";
-					}
-					otherView.setText("Distance: " + response.getString("distance") + " Time Taken: " + time + " Markers: " + response.getString("markers"));
-					
-					root.setVisibility(VISIBLE);
+                    LinearLayout root = (LinearLayout) t.findViewById(R.id.view_ui);
+
+                    Button goButton = (Button) root.findViewById(exploreId.get("goButton"));
+					goButton.setOnClickListener( new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            // TODO Auto-generated method stub
+
+                        }
+                    });
+
+
+                    TextView nameView = (TextView) root.findViewById(exploreId.get("nameView"));
+                    try {
+                        nameView.setText(response.getString("name"));
+
+
+                    TextView descriptionView = (TextView) root.findViewById(exploreId.get("descriptionView"));
+                    descriptionView.setText(response.getString("description"));
+
+                    new DownloadImageTask((ImageView) root.findViewById(exploreId.get("imageView")))
+                        .execute("https://trails.sudharshan.makerforce.io/assets/" + response.getString("picture"));
+
+                    TextView otherView = (TextView) root.findViewById(exploreId.get("otherView"));
+                    long rawTime = response.getLong("time");
+                    String time = "";
+                    if (rawTime / 3600 != 0) {
+                        time += (rawTime/3600) + "h ";
+                        if (rawTime / 60 != 0) {
+                            time += (rawTime/60) + "m " ;
+                        }
+                    }
+                    else {
+                        if (rawTime / 60 != 0) {
+                            time += (rawTime/60) + "m " ;
+                        }
+                        time += (rawTime % 60) + "s";
+                    }
+                    otherView.setText("Distance: " + response.getString("distance") + " Time Taken: " + time + " Markers: " + response.getString("markers"));
+
+                    root.setVisibility(VISIBLE);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 				}
 			}, new Response.ErrorListener() {
 
@@ -334,7 +362,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
 	@Override
 	public void onMapClick(LatLng point) {
 		LinearLayout root = (LinearLayout) findViewById(R.id.view_ui);
-		root.setVisibility(INVISIBLE);
+		root.setVisibility(View.INVISIBLE);
 	}
 
     private void enableMyLocation() {
@@ -356,15 +384,16 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
     @Override
     public void onLocationChanged(Location location) {
 		if (state == State.enRoute) {
+            /*
 			if (currentDestination != null && location.distanceTo(currentDestination) < 10) {
 				if (checkEnd()) {
 					showEnd();
 					return;
 				}
-				currentStart = route.get(routeIndex).first;
+				currentStart = route.get(routeIndex);
 				routeIndex++;
 				currentDestination = route.get(routeIndex).first;
-			}
+			}*/
 		}
     }
 
