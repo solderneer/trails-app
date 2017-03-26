@@ -222,7 +222,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
 
 			// Request a string response from the provided URL.
 
-			JsonObjectRequest stringRequest = new JsonArrayRequest(url, new JSONArray(),
+			JsonArrayRequest stringRequest = new JsonArrayRequest(url, new JSONArray(),
 				new Response.Listener<JSONArray>() {
 					@Override
 					public void onResponse(JSONArray response) {
@@ -263,6 +263,51 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
 	public boolean onMarkerClick(final Marker marker) {
 		String id = (String) marker.getTag();
 		
+		String url = "https://trails.sudharshan.makerforce.io/trails/" + id;
+
+		// Request a string response from the provided URL.
+
+		JsonObjectRequest stringRequest = new JsonObjectRequest(url, new JSONObject(),
+			new Response.Listener<JSONObject>() {
+				@Override
+				public void onResponse(JSONObject response) {
+					//reponse is a trailObjects
+					
+					LinearLayout root = (LinearLayout) findViewById(R.id.view_ui);
+		
+					TextView nameView = (TextView) root.findViewById(exploreId.get("nameView"));
+					nameView.setText(response.getString("name"));
+					
+					TextView descriptionView = (TextView) root.findViewById(exploreId.get("descriptionView"));
+					descriptionView.setText(response.getString("description"));
+					
+					TextView otherView = (TextView) root.findViewById(exploreId.get("otherView"));
+					long rawTime = response.getDouble("time");
+					String time = "";
+					if (rawTime / 3600 != 0) {
+						time += (rawTime/3600) + "h ";
+						if (rawTime / 60 != 0) {
+							time += (rawTime/60) + "m " ;
+						}
+					}
+					else {
+						if (rawTime / 60 != 0) {
+							time += (rawTime/60) + "m " ;
+						}
+						time += (rawTime % 60) + "s";
+					}
+					otherView.setText("Distance: " + response.getString("distance") + " Time Taken: " + time + " Markers: " + response.getString("markers"));
+				}
+			}, new Response.ErrorListener() {
+
+				@Override
+				public void onErrorResponse(VolleyError error) {
+
+				}
+			}
+		);
+		// Add the request to the RequestQueue.
+		queue.add(stringRequest);
 		
 		
 		return true;
