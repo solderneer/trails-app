@@ -93,7 +93,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-	private enum State{explore, search, make};
+	private enum State{explore, enRoute, search, make};
 	private State state;
 	
     private void showExplore() {
@@ -205,15 +205,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-        if (currentDestination != null && location.distanceTo(currentDestination) < 10) {
-            if (checkEnd()) {
-                showEnd();
-                return;
-            }
-            currentStart = route.get(routeIndex).first;
-            routeIndex++;
-            currentDestination = route.get(routeIndex).first;
-        }
+		if (state == explore) {
+			
+		}
+		else if (state == enRoute) {
+			if (currentDestination != null && location.distanceTo(currentDestination) < 10) {
+				if (checkEnd()) {
+					showEnd();
+					return;
+				}
+				currentStart = route.get(routeIndex).first;
+				routeIndex++;
+				currentDestination = route.get(routeIndex).first;
+			}
+		}
     }
 
     @Override
