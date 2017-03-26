@@ -270,22 +270,34 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
 
 		JsonObjectRequest stringRequest = new JsonObjectRequest(url, new JSONObject(),
 			new Response.Listener<JSONObject>() {
+				
+				final String fid = id;
 				@Override
 				public void onResponse(JSONObject response) {
 					//reponse is a trailObjects
 					
-					LinearLayout root = (LinearLayout) findViewById(R.id.view_ui);
-		
-					TextView nameView = (TextView) root.findViewById(exploreId.get("nameView"));
-					nameView.setText(response.getString("name"));
-					
-					TextView descriptionView = (TextView) root.findViewById(exploreId.get("descriptionView"));
-					descriptionView.setText(response.getString("description"));
-					
-					new DownloadImageTask((ImageView) root.findViewById(exploreId.get("imageView")));
-						.execute("https://trails.sudharshan.makerforce.io/assets/" + reponse.getString("picture"));
-					
-					TextView otherView = (TextView) root.findViewById(exploreId.get("otherView"));
+					clickButton.setOnClickListener( new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							// TODO Auto-generated method stub
+							
+						}
+					}
+				);
+				
+				LinearLayout root = (LinearLayout) findViewById(R.id.view_ui);
+	
+				TextView nameView = (TextView) root.findViewById(exploreId.get("nameView"));
+				nameView.setText(response.getString("name"));
+				
+				TextView descriptionView = (TextView) root.findViewById(exploreId.get("descriptionView"));
+				descriptionView.setText(response.getString("description"));
+				
+				new DownloadImageTask((ImageView) root.findViewById(exploreId.get("imageView")));
+					.execute("https://trails.sudharshan.makerforce.io/assets/" + reponse.getString("picture"));
+				
+				TextView otherView = (TextView) root.findViewById(exploreId.get("otherView"));
 					long rawTime = response.getDouble("time");
 					String time = "";
 					if (rawTime / 3600 != 0) {
