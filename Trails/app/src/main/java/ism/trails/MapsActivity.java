@@ -297,6 +297,8 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
 						time += (rawTime % 60) + "s";
 					}
 					otherView.setText("Distance: " + response.getString("distance") + " Time Taken: " + time + " Markers: " + response.getString("markers"));
+					
+					root.setVisibility(VISIBLE);
 				}
 			}, new Response.ErrorListener() {
 
