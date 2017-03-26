@@ -145,6 +145,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
 		
 		ImageView image = new ImageView(this);
 		imageView.setId(exploreId.get("imageView");
+		imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 		
 		hBox.addChildren(image);
 		
@@ -280,6 +281,9 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
 					
 					TextView descriptionView = (TextView) root.findViewById(exploreId.get("descriptionView"));
 					descriptionView.setText(response.getString("description"));
+					
+					new DownloadImageTask((ImageView) root.findViewById(exploreId.get("imageView")));
+						.execute("https://trails.sudharshan.makerforce.io/assets/" + reponse.getString("picture"));
 					
 					TextView otherView = (TextView) root.findViewById(exploreId.get("otherView"));
 					long rawTime = response.getDouble("time");
@@ -437,4 +441,29 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMapRea
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
     }
+	
+	private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+		ImageView bmImage;
+
+		public DownloadImageTask(ImageView bmImage) {
+			this.bmImage = bmImage;
+		}
+
+		protected Bitmap doInBackground(String... urls) {
+			String urldisplay = urls[0];
+			Bitmap mIcon11 = null;
+			try {
+				InputStream in = new java.net.URL(urldisplay).openStream();
+				mIcon11 = BitmapFactory.decodeStream(in);
+			} catch (Exception e) {
+				Log.e("Error", e.getMessage());
+				e.printStackTrace();
+			}
+			return mIcon11;
+		}
+
+		protected void onPostExecute(Bitmap result) {
+			bmImage.setImageBitmap(result);
+		}
+	}
 }
