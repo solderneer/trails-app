@@ -8,6 +8,7 @@ var express    = require('express');        // call express
 var app        = express();                 // define our app using express
 var bodyParser = require('body-parser');
 var Trails     = require('./app/models/trails');
+var Points     = require('./app/models/points')
 var boundaries = require('./app/modules/boundaries')
 
 //Set up mongoose connection
@@ -54,12 +55,13 @@ conn.once('open', function() {
             console.log("I got here");
             var trails = new Trails();
             trails.name = req.body.name;
-            trails.longitude = req.body.longitude;
-            trails.latitude = req.body.latitude;
+            trials.route = req.body.route;
             trails.distance = req.body.distance;
             trails.time = req.body.time;
             trails.likes = req.body.likes;
             trails.markers = req.body.markers;
+            trails.picture = req.body.picture;
+            trails.description = req.body.description;
             console.log(trails);
             console.log(trails.name);
 
@@ -74,11 +76,10 @@ conn.once('open', function() {
         })
 
         .get(function(req, res) {
-            Trails.find({}, {name:1, longitude:1, latitude:1}, function(err, trails) {
+            Trails.find(function(err, trails) {
                 if(err)
                     res.send(err);
 
-                console.log(boundaries);
                 res.json(trails);
             });
         });
@@ -99,12 +100,13 @@ conn.once('open', function() {
                     res.send(err)
 
                 trails.name = req.body.name;
-                trails.longitude = req.body.longitude;
-                trails.latitude = req.body.latitude;
+                trials.route = req.body.route;
                 trails.distance = req.body.distance;
                 trails.time = req.body.time;
                 trails.likes = req.body.likes;
                 trails.markers = req.body.markers;
+                trails.picture = req.body.picture;
+                trails.description = req.body.description;
                 
                 trails.save(function(err){
                     if(err) 
@@ -125,13 +127,87 @@ conn.once('open', function() {
             res.json({message: 'Boudaries set!'});
         });
 
-        // REGISTER OUR ROUTES -------------------------------
-        // all of our routes will be prefixed with /api
-        app.use('/api', router);
+    router.route('/points')
+        
+        .post(function(req, res){
+            var points = new Points();
+            points.name = req.body.name;
+            points.picture = req.body.picture;
+            points.description = req.body.description;
+            points.image1 = req.body.image1;
+            points.image2 = req.body.image2;
+            points.image3 = req.body.image3;
+            points.image4 = req.body.image4;
+            points.caption1 = req.body.caption1;
+            points.caption2 = req.body.caption2;
+            points.caption3 = req.body.caption3;
+            points.caption4 = req.body.caption4;
 
-        // START THE SERVER
-        // =============================================================================
-        app.listen(port);
-        console.log('Magic happens on port ' + port);
+            points.save(function(err){
+                if (err){
+                    res.send(err);
+                    console.log("I got here");
+                }
+                    res.json({message: 'Point created!'});
+            });
+
+        })
+
+
+        .get(function(req, res){
+            Points.find(function(err, points) {
+                if(err)
+                    res.send(err);
+
+                res.json(points);
+            });
+        });
+
+    router.route('/points/:point_id')
+
+        .put(function(req, res) {
+            Points.findById(req.params.point_id, function(err, points) {
+                if(err)
+                    res.send(err)
+
+                points.name = req.body.name;
+                points.picture = req.body.picture;
+                points.description = req.body.description;
+                points.image1 = req.body.image1;
+                points.image2 = req.body.image2;
+                points.image3 = req.body.image3;
+                points.image4 = req.body.image4;
+                points.caption1 = req.body.caption1;
+                points.caption2 = req.body.caption2;
+                points.caption3 = req.body.caption3;
+                points.caption4 = req.body.caption4;
+                
+                points.save(function(err){
+                    if(err) 
+                        res.send(err);
+
+                    res.json({message: 'Trail updated!'});
+                });
+            });
+        })
+
+        .get(function(req, res){
+            Points.findById(req.params.point_id, function(err, points){
+                if (err)
+                    res.send(err);
+                res.json(points);
+            });
+        });
+
+
+
+    // REGISTER OUR ROUTES -------------------------------
+    // all of our routes will be prefixed with /api
+    app.use('/api', router);
+
+    // START THE SERVER
+    // =============================================================================
+    app.listen(port);
+    console.log('Magic happens on port ' + port);
          
 });

@@ -3,13 +3,13 @@ var Schema = mongoose.Schema;
 
 var TrailSchema = new Schema({
     name: String,
-    longitude: Number,
-    latitude: Number,
+    route: Array,
     distance: Number,
     time: Number,
     likes: Number,
     markers: Number,
-    picture: String
+    picture: String,
+    description: String
 });
 
 module.exports = mongoose.model('Trails', TrailSchema);
