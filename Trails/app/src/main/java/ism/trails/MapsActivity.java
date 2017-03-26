@@ -50,16 +50,17 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, OnCameraMoveListener, LocationListener {
 
     private GoogleMap mMap;
 
     private Location currentStart;
     private Location currentDestination;
-    private HashMap<Location, String> trailMarkers;
-    private ArrayList<Pair<Location, LocationInfo>> route;
+    private HashMap<String, LatLng> trailMarkers;
+	private ArrayList<LatLng> roughRoute;
+    private ArrayList<LocationInfo> route;
     private int routeIndex;
-    private HashMap<Location, ArrayList<Pair<Location, LocationInfo>>> preRoute;
+    private HashMap<LocationInfo, ArrayList<Pair<LatLng, LocationInfo>>> preRoute;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -157,7 +158,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 		
 		root.addChildren(infoView);
 		
-		state = explore;
+		state = State.explore;
     }
 
     private void highlightTab(int tabId) {
@@ -183,9 +184,80 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+		mMap.
 
         enableMyLocation();
     }
+	
+	double prevMaxLat = 0, prevMinLat = 0, prevMaxLong = 0, prevMinLong = 0;
+	@Override
+	public void onCameraMove() {
+		if (state == State.explore && prevMaxLat != 0) {
+			RequestQueue queue = Volley.newRequestQueue(this);
+			VisibleRegion vr = mMap.getProjection().getVisibleRegion();
+			LatLng farLeft = vr.farLeft;
+			LatLng nearRight = vr.nearRight;
+			double maxLat = max(farLeft.latitude, nearRight.latitude);
+			double minLat = min(farLeft.latitude, nearRight.latitude);
+			double maxLong = max(farLeft.longitude, nearRight.longitude);
+			double minLong = min(farLeft.longitude, nearRight.longitude);
+			
+			if (maxLat < prevMaxLat || maxLong < prevMaxLong || minLat > prevMinLat || minLong > prevMinLong) {
+				return;
+			}
+			
+			double diffLat = (maxLat - minLat) * 5;
+			double diffLong = (maxLong - minLong) * 5;
+			maxLat = maxLat + diffLat;
+			maxLong = maxLong + diffLong;
+			minLat = minLat + diffLat;
+			minLong = minLong + diffLong;
+			
+			
+			String url = "https://trails.sudharshan.makerforce.io/trails/restricted?" +
+				"longbot=" + minLong  + "&" +
+				"longtop=" + maxLong + "&" +
+				"latbot=" + minLat + "&" +
+				"lattop=" + maxLat;
+
+			// Request a string response from the provided URL.
+
+			JsonObjectRequest stringRequest = new JsonArrayRequest(url, new JSONArray(),
+				new Response.Listener<JSONArray>() {
+					@Override
+					public void onResponse(JSONArray response) {
+						//reponse is a list of trailObjects
+						
+						for (int i = 0; i < response.length(); i++) {
+							JSONObject trail = reponse.get(i);
+							if (trailMarkers.getOrDefault(trail.getString("id"), null) == null) {
+								trailMakers.put(trail.getString("id"), new LatLng(trail.getDouble("latitude"), trail.getDouble("longitude")));
+								
+								Marker marker = map.addMarker(new MarkerOptions()
+									.position(new LatLng(trail.getDouble("latitude"), trail.getDouble("longitude")))
+								)
+								marker.setTag(trail.getString("id"));
+								
+							}
+						}
+					}
+				}, new Response.ErrorListener() {
+
+					@Override
+					public void onErrorResponse(VolleyError error) {
+
+					}
+				}
+			);
+			// Add the request to the RequestQueue.
+			queue.add(stringRequest);
+			
+			prevMaxLat = maxLat;
+			prevMaxLong = maxLong;
+			prevMinLat = minLat;
+			prevMinLong = minLong;
+		}
+	}
 
     private void enableMyLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -205,10 +277,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
-		if (state == explore) {
-			
-		}
-		else if (state == enRoute) {
+		if (state == State.enRoute) {
 			if (currentDestination != null && location.distanceTo(currentDestination) < 10) {
 				if (checkEnd()) {
 					showEnd();

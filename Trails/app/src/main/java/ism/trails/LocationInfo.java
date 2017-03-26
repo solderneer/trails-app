@@ -16,13 +16,15 @@ public class LocationInfo {
     public URL pictureURL;
     public double distance;
     public long timeTaken;
+	public LatLng latLng;
 
-    public LocationInfo(Type type, String name, String description, double distance, long timeTaken, URL pictureURL) {
+    public LocationInfo(Type type, String name, String description, double distance, long timeTaken, URL pictureURL, LatLng latLng) {
         this.type = type;
         this.name = name;
         this.description = description;
         this.distance = distance;
         this.timeTaken = timeTaken;
         this.pictureURL = pictureURL;
+		this.latLng = latLng;
     }
 }
