@@ -236,19 +236,58 @@ module.exports = function(nano){
   });
 
   api.post("/point/image", upload.single("image"), function(req, res){
-
+    images.insert({caption : req.body.caption}, req.file.filename, function(err, body){
+      if(err){
+        res.status(500).json({
+          message : "Database error",
+          data : err
+        });
+      }else{
+        res.status(200).json({
+          message : "Success",
+          image : body
+        });
+      }
+    });
   });
 
   api.post("/user/new", function(req, res){
 
   });
 
+  //Email veriication
   api.get("/user/new/:code", function(req, res){
 
   });
 
   api.post("/login", function(req, res){
-
+    users.get(req.body.email, function(err, body){
+      if(err){
+        if(err.error == "not_found"){
+          res.status(404).json({
+            message : "User not found",
+            data : err
+          });
+        }else{
+          res.status(500).json({
+            message : "Database error",
+            data : err
+          });
+        }
+      }else{
+        if(body.password === req.body.passord){
+          res.status(200).json({
+            message : "Success!",
+            token : jwt.sign(body, config.secret),
+            expiry : config.expiry
+          });
+        }else{
+          res.status(400).json({
+            message : "Incorrect password"
+          });
+        }
+      }
+    });
   });
 
   return api;
