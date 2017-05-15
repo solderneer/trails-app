@@ -3,9 +3,6 @@
 
 Geo-location based learning app to enhance fieldtrips and heritage trails
 
-- [C__Users_Orcas_Desktop_trails_app_server_api_js](#c__users_orcas_desktop_trails_app_server_api_js)
-	- [Get trail by code](#get-trail-by-code)
-	
 - [General](#general)
 	- [Ping API](#ping-api)
 	
@@ -16,6 +13,7 @@ Geo-location based learning app to enhance fieldtrips and heritage trails
 	
 - [Trail](#trail)
 	- [Add a new trail](#add-a-new-trail)
+	- [Get trail by code](#get-trail-by-code)
 	- [Get trail by ID](#get-trail-by-id)
 	
 - [User](#user)
@@ -28,64 +26,6 @@ Geo-location based learning app to enhance fieldtrips and heritage trails
 	
 
 
-# C__Users_Orcas_Desktop_trails_app_server_api_js
-
-## Get trail by code
-[Back to top](#top)
-
-
-
-	GET /trail/code/:code
-
-
-
-
-
-### Parameter Parameters
-
-| Name     | Type       | Description                           |
-|:---------|:-----------|:--------------------------------------|
-| code | String | <p>Trail's code</p>|
-
-### Success Response
-
-Success-Response:
-
-```
-	HTTP/1.1 200 OK
-	{
-	    "message" : "Success",
-     "trail" : {trail}
-	}
-```
-
-### Success 200
-
-| Name     | Type       | Description                           |
-|:---------|:-----------|:--------------------------------------|
-| message | String | <p>&quot;Success!&quot;</p>|
-| trail | json | <p>Trail with specified code</p>|
-
-### Error Response
-
-Database Error:
-
-```
-	HTTP/1.1 500 Internal Server Error
-	{
-	    "message" : "Database error",
-     "data" : {err}
-	}
-```
-Database Error:
-
-```
-	HTTP/1.1 404 Not Found
-	{
-	    "message" : "Trail not found",
-     "data" : {err}
-	}
-```
 # General
 
 ## Ping API
@@ -395,6 +335,62 @@ HTTP/1.1 400 Bad Request
 {
     "message" : "No trail description!"
 }
+```
+## Get trail by code
+[Back to top](#top)
+
+
+
+	GET /trail/code/:code
+
+
+
+
+
+### Parameter Parameters
+
+| Name     | Type       | Description                           |
+|:---------|:-----------|:--------------------------------------|
+| code | String | <p>Trail's code</p>|
+
+### Success Response
+
+Success-Response:
+
+```
+	HTTP/1.1 200 OK
+	{
+	    "message" : "Success",
+     "trail" : {trail}
+	}
+```
+
+### Success 200
+
+| Name     | Type       | Description                           |
+|:---------|:-----------|:--------------------------------------|
+| message | String | <p>&quot;Success!&quot;</p>|
+| trail | json | <p>Trail with specified code</p>|
+
+### Error Response
+
+Database Error:
+
+```
+	HTTP/1.1 500 Internal Server Error
+	{
+	    "message" : "Database error",
+     "data" : {err}
+	}
+```
+Database Error:
+
+```
+	HTTP/1.1 404 Not Found
+	{
+	    "message" : "Trail not found",
+     "data" : {err}
+	}
 ```
 ## Get trail by ID
 [Back to top](#top)

@@ -1,83 +1,31 @@
 [
   {
-    "type": "get",
-    "url": "/trail/code/:code",
-    "title": "Get trail by code",
-    "name": "TrailCode",
-    "parameter": {
-      "fields": {
-        "Parameter": [
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "code",
-            "description": "<p>Trail's code</p>"
-          }
-        ]
-      }
-    },
     "success": {
       "fields": {
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "String",
             "optional": false,
-            "field": "message",
-            "description": "<p>&quot;Success!&quot;</p>"
+            "field": "varname1",
+            "description": "<p>No type.</p>"
           },
           {
             "group": "Success 200",
-            "type": "json",
+            "type": "String",
             "optional": false,
-            "field": "trail",
-            "description": "<p>Trail with specified code</p>"
+            "field": "varname2",
+            "description": "<p>With type.</p>"
           }
         ]
-      },
-      "examples": [
-        {
-          "title": "Success-Response:",
-          "content": "\tHTTP/1.1 200 OK\n\t{\n\t    \"message\" : \"Success\",\n     \"trail\" : {trail}\n\t}",
-          "type": "json"
-        }
-      ]
+      }
     },
-    "error": {
-      "fields": {
-        "Error 4xx": [
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "DatabaseError",
-            "description": "<p>The database encountered some sort of error.</p>"
-          },
-          {
-            "group": "Error 4xx",
-            "optional": false,
-            "field": "NotFound",
-            "description": "<p>The specified code cannot be found</p>"
-          }
-        ]
-      },
-      "examples": [
-        {
-          "title": "Database Error:",
-          "content": "\tHTTP/1.1 500 Internal Server Error\n\t{\n\t    \"message\" : \"Database error\",\n     \"data\" : {err}\n\t}",
-          "type": "json"
-        },
-        {
-          "title": "Database Error:",
-          "content": "\tHTTP/1.1 404 Not Found\n\t{\n\t    \"message\" : \"Trail not found\",\n     \"data\" : {err}\n\t}",
-          "type": "json"
-        }
-      ]
-    },
+    "type": "",
+    "url": "",
     "version": "0.0.0",
-    "filename": "./api.js",
-    "group": "C__Users_Orcas_Desktop_trails_app_server_api_js",
-    "groupTitle": "C__Users_Orcas_Desktop_trails_app_server_api_js"
+    "filename": "./doc/main.js",
+    "group": "C__Users_Orcas_Desktop_trails_app_server_doc_main_js",
+    "groupTitle": "C__Users_Orcas_Desktop_trails_app_server_doc_main_js",
+    "name": ""
   },
   {
     "type": "",
@@ -866,6 +814,86 @@
         {
           "title": "Missing Field:",
           "content": "HTTP/1.1 400 Bad Request\n{\n    \"message\" : \"No trail description!\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "version": "0.0.0",
+    "filename": "./api.js",
+    "groupTitle": "Trail"
+  },
+  {
+    "type": "get",
+    "url": "/trail/code/:code",
+    "title": "Get trail by code",
+    "name": "TrailCode",
+    "group": "Trail",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "code",
+            "description": "<p>Trail's code</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "message",
+            "description": "<p>&quot;Success!&quot;</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "json",
+            "optional": false,
+            "field": "trail",
+            "description": "<p>Trail with specified code</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "\tHTTP/1.1 200 OK\n\t{\n\t    \"message\" : \"Success\",\n     \"trail\" : {trail}\n\t}",
+          "type": "json"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "DatabaseError",
+            "description": "<p>The database encountered some sort of error.</p>"
+          },
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "NotFound",
+            "description": "<p>The specified code cannot be found</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Database Error:",
+          "content": "\tHTTP/1.1 500 Internal Server Error\n\t{\n\t    \"message\" : \"Database error\",\n     \"data\" : {err}\n\t}",
+          "type": "json"
+        },
+        {
+          "title": "Database Error:",
+          "content": "\tHTTP/1.1 404 Not Found\n\t{\n\t    \"message\" : \"Trail not found\",\n     \"data\" : {err}\n\t}",
           "type": "json"
         }
       ]

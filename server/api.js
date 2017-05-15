@@ -180,7 +180,7 @@ module.exports = function(nano){
   /**
    * @api {get} /trail/code/:code Get trail by code
    * @apiName TrailCode
-   * @apiCode Trail
+   * @apiGroup Trail
    *
    * @apiParam {String} code Trail's code
    *
