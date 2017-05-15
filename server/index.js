@@ -1,7 +1,7 @@
 var config = require("./config");
 
 var express = require("express");
-var nano = require("nano");
+var nano = require("nano")(config.db_location);
 
 var app = express();
 var api = require("./api")(nano);

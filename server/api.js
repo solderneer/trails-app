@@ -103,7 +103,23 @@ module.exports = function(nano){
   });
 
   api.get("/trail/code/:code", function(req, res){
-
+    trails.view('trails_design', "by_code", {keys : [req.params.code]}, function(err, body){
+      if(err){
+        res.status(500).json({
+          message : "Database err",
+          data : err
+        });
+      }else if(body.length < 1){
+        res.status(400).json({
+          message : "Code not found",
+        })
+      }else{
+        res.status(200).json({
+          message : "Success!",
+          trail : body[0]
+        });
+      }
+    });
   });
 
   api.post("/trail/new", upload.single("picture"), function(req, res){
