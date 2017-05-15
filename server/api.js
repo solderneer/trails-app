@@ -14,6 +14,7 @@ module.exports = function(nano){
   var multer = require("multer");
   var shortid = require("shortid");
   var async = require("async");
+  var nodemailer = require("nodemailer");
 
   var storage = multer.diskStorage({
     destination : function(req, file, cb){
@@ -24,6 +25,8 @@ module.exports = function(nano){
     }
   });
   var upload = multer({storage : storage});
+
+  var transporter = nodemailer.createTransport(config.smtp);
 
   var api = express.Router();
 
@@ -277,12 +280,111 @@ module.exports = function(nano){
   });
 
   api.post("/user/new", function(req, res){
-
+    if(req.body.email == ""){
+      res.status(400).json({
+        message : "No email",
+        data : err
+      });
+    }else if(req.body.password == ""){
+      res.status(400).json({
+        message : "No password",
+        data : err
+      });
+    }else if(req.body.name == ""){
+      res.status(400).json({
+        message : "No name",
+        data : err
+      });
+    }else{
+      users.get(req.body.email, function(err, body){
+        if(err && err.error == "not_found"){
+          var user_data = {
+            email : req.body.email,
+            name : req.body.name,
+            password : req.body.password
+          };
+          codes.insert(user_data, shortid.generate, function(c_err, c_body){
+            if(c_err){
+              res.status(500).json({
+                message : "Database error",
+                data : c_err
+              });
+            }else{
+              var mail_data = {
+                from : config.smtp.auth.user,
+                to : req.body.email,
+                subject : 'Verify signup',
+                html : '<a>http://' + config.host + '/api/user/new/' + c_body._id'</a>'
+              }
+              transporter.sendMail(mailOptions, function(error, info){
+                  if (error) {
+                    res.status(500).json({
+                      message : "Error sending email",
+                      data : error
+                    });
+                  }else{
+                    res.status(200).json({
+                      message : "Success!"
+                    });
+                  }
+              });
+            }
+          });
+        }else{
+          res.status(400).json({
+            message : "User with email already exists",
+            data : err
+          });
+        }
+      });
+    }
   });
 
   //Email veriication
   api.get("/user/new/:code", function(req, res){
-
+    codes.get(req.params.code, function(err, body){
+      if(err){
+        if(err.error == "not_found"){
+          res.status(404).json({
+            message : "Invalid code",
+            data : err
+          });
+        }else{
+          res.status(500).json({
+            message : "Database error",
+            data : err
+          });
+        }
+      }else{
+        var user_data = {
+          name : body.name,
+          password : body.password
+        };
+        users.insert(user_data, body.email, function(u_err, user){
+          if(u_err){
+            res.status(500).json({
+              message : "Database error",
+              data : u_err
+            });
+          }else{
+            codes.destroy(req.params.code, body._rev, function(d_err, success_body){
+              if(d_err){
+                res.status(500).json({
+                  message : "Database error",
+                  data : d_err
+                });
+              }else{
+                res.status(200).json({
+                  message : "Success",
+                  token : jwt.sign(body, config.secret),
+                  expiry : config.expiry
+                });
+              }
+            });
+          }
+        });
+      }
+    });
   });
 
   api.post("/login", function(req, res){

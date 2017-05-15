@@ -3,5 +3,15 @@ module.exports = {
   db_location : "http://localhost:5984",
   secret : 'secret',
   expiry : 60 * 60 * 24, //Seconds
-  uploads : "/uploads"
+  uploads : "/uploads",
+  host : 'locahost',
+  smtp : {
+    host: '',
+    port: undefined,
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+        user: '',
+        pass: ''
+    }
+  }
 };
