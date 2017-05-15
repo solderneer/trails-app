@@ -114,9 +114,18 @@ module.exports = function(nano){
           message : "Code not found",
         })
       }else{
-        res.status(200).json({
-          message : "Success!",
-          trail : body[0]
+        trails.get(body[0].value, function(trail_err, trail_body){
+          if(trail_err){
+            res.status(500).json({
+              message : "Database err",
+              data : err
+            });
+          }else{
+            res.status(200).json({
+              message : "Success!",
+              trail : trail_body
+            });
+          }
         });
       }
     });
