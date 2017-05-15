@@ -33,12 +33,49 @@ module.exports = function(nano){
   api.use(bodyParser.json());
   api.use(bodyParser.urlencoded({extended : true}));
 
+  /**
+   * @api {get} / Ping API
+   * @apiName Ping
+   * @apiGroup General
+   *
+   * @apiSuccess {String} message "Received"
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Received"
+   * 	}
+   */
   api.get("/", function(req, res){
     res.status(200).json({
       message : "Received"
     });
   });
 
+  /**
+   * @api {get} /trails Get all trails
+   * @apiName ListTrail
+   * @apiGroup trails
+   *
+   * @apiSuccess {String} message "Success!"
+   * @apiSuccess {json} trails Array of all the trails in the database
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Success",
+   *      "trails" : [trail...]
+   * 	}
+   *
+   * @apiError DatabaseError The database encountered some sort of error.
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Database error",
+   *      "data" : {err}
+   * 	}
+   */
   api.get("/trails", function(req, res){
     trails.list(function(err, body){
       if(err){
@@ -82,6 +119,41 @@ module.exports = function(nano){
     });
   });
 
+  /**
+   * @api {get} /trail/:id Get trail by ID
+   * @apiName TrailID
+   * @apiGroup Trail
+   *
+   * @apiParam {String} id Trail's ID
+   *
+   * @apiSuccess {String} message "Success!"
+   * @apiSuccess {json} trail Trail with specified ID
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Success",
+   *      "trail" : {trail}
+   * 	}
+   *
+   * @apiError DatabaseError The database encountered some sort of error.
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Database error",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError NotFound The specified ID cannot be found
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 404 Not Found
+   * 	{
+   *	    "message" : "Trail not found",
+   *      "data" : {err}
+   * 	}
+   */
   api.get('/trail/:id', function(req, res){
     trails.get(req.params.id, function(err, body){
       if(err){
@@ -105,6 +177,41 @@ module.exports = function(nano){
     });
   });
 
+  /**
+   * @api {get} /trail/code/:code Get trail by code
+   * @apiName TrailCode
+   * @apiCode Trail
+   *
+   * @apiParam {String} code Trail's code
+   *
+   * @apiSuccess {String} message "Success!"
+   * @apiSuccess {json} trail Trail with specified code
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Success",
+   *      "trail" : {trail}
+   * 	}
+   *
+   * @apiError DatabaseError The database encountered some sort of error.
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Database error",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError NotFound The specified code cannot be found
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 404 Not Found
+   * 	{
+   *	    "message" : "Trail not found",
+   *      "data" : {err}
+   * 	}
+   */
   api.get("/trail/code/:code", function(req, res){
     trails.view('trails_design', "by_code", {keys : [req.params.code]}, function(err, body){
       if(err){
@@ -113,9 +220,9 @@ module.exports = function(nano){
           data : err
         });
       }else if(body.length < 1){
-        res.status(400).json({
-          message : "Code not found",
-        })
+        res.status(404).json({
+          message : "Trail not found",
+        });
       }else{
         trails.get(body[0].value, function(trail_err, trail_body){
           if(trail_err){
@@ -134,6 +241,67 @@ module.exports = function(nano){
     });
   });
 
+  /**
+   * @api {post} /trail/new Add a new trail
+   * @apiName NewTrail
+   * @apiGroup Trail
+   *
+   * @apiParam {String} token JWT token of verified user
+   * @apiParam {String} name Name of trail
+   * @apiParam {String} description Description of trail
+   * @apiParam {String} code Trail's code
+   * @apiParam {String[]} points Array of ids of points in trail
+   * @apiParam {File} picture Picture for trail
+   *
+   * @apiSuccess {String} message "Success!"
+   * @apiSuccess {json} trail Created trail
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Success",
+   *      "trail" : {trail}
+   * 	}
+   *
+   * @apiError DatabaseError The database encountered some sort of error.
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Database error",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError JWTError The given jwt is invalid for whatever reason
+   *
+   * @apiErrorExample {json} Invalid Autnetication Token:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "Invalid autnetication token",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiErrorExample {json} JWT Error:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "JWT Error",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError FieldMissing There are missing fields
+   *
+   * @apiErrorExample {json} Missing Field:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "No trail name!"
+   * 	}
+   *
+   * @apiErrorExample {json} Missing Field:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "No trail description!"
+   * 	}
+   */
   api.post("/trail/new", upload.single("picture"), function(req, res){
     jwt.verify(req.body.token, config.secret, function(err, decoded){
       if(err){
@@ -186,12 +354,47 @@ module.exports = function(nano){
     });
   });
 
+  /**
+   * @api {get} /point/:id Get a point by its ID
+   * @apiName PointID
+   * @apiGroup Point
+   *
+   * @apiParam {String} id Point ID
+   *
+   * @apiSuccess {String} message "Success!"
+   * @apiSuccess {json} point Point with specific ID
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Success",
+   *      "point" : {point}
+   * 	}
+   *
+   * @apiError DatabaseError The database encountered some sort of error.
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Database error",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError NotFound The specified code cannot be found
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 404 Not Found
+   * 	{
+   *	    "message" : "Point not found",
+   *      "data" : {err}
+   * 	}
+   */
   api.get("/point/:id", function(req, res){
     points.get(req.params.id, function(err, body){
       if(err){
         if(err.error == "not_found"){
           res.status(404).json({
-            message : "Trail not found",
+            message : "Point not found",
             data : err
           });
         }else{
@@ -209,6 +412,67 @@ module.exports = function(nano){
     });
   });
 
+  /**
+   * @api {post} /point/new Add a new point
+   * @apiName NewPoint
+   * @apiGroup Point
+   *
+   * @apiParam {String} token JWT token of verified user
+   * @apiParam {String} name Name of point
+   * @apiParam {String} description Description of point
+   * @apiParam {File} picture Picture for trail
+   * @apiParam {Number} lat Point's lat
+   * @apiParam {Number} lng Point's lng
+   *
+   * @apiSuccess {String} message "Success!"
+   * @apiSuccess {json} point Created point
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Success",
+   *      "point" : {point}
+   * 	}
+   *
+   * @apiError DatabaseError The database encountered some sort of error.
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Database error",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError JWTError The given jwt is invalid for whatever reason
+   *
+   * @apiErrorExample {json} Invalid Autnetication Token:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "Invalid autnetication token",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiErrorExample {json} JWT Error:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "JWT Error",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError FieldMissing There are missing fields
+   *
+   * @apiErrorExample {json} Missing Field:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "No trail name!"
+   * 	}
+   *
+   * @apiErrorExample {json} Missing Field:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "No trail description!"
+   * 	}
+   */
   api.post("/point/new", function(req, res){
     jwt.verify(req.body.token, config.secret, function(err, decoded){
       if(err){
@@ -263,7 +527,34 @@ module.exports = function(nano){
     });
   });
 
+  /**
+   * @api {post} /point/image Add a captioned image to a point
+   * @apiName PointImage
+   * @apiGroup Point
+   *
+   * @apiParam {String} token JWT token of verified user
+   * @apiParam {File} image Image file
+   * @apiParam {String} caption Image caption
+   *
+   * @apiSuccess {String} message "Success!"
+   * @apiSuccess {json} image Added image
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Success",
+   *      "image" : {image}
+   * 	}
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Database error",
+   *      "data" : {err}
+   * 	}
+   */
   api.post("/point/image", upload.single("image"), function(req, res){
+    //TODO require JWT
     images.insert({caption : req.body.caption}, req.file.filename, function(err, body){
       if(err){
         res.status(500).json({
@@ -271,6 +562,7 @@ module.exports = function(nano){
           data : err
         });
       }else{
+        //TODO: Add to point
         res.status(200).json({
           message : "Success",
           image : body
@@ -279,6 +571,61 @@ module.exports = function(nano){
     });
   });
 
+  /**
+   * @api {post} /user/new Add a new user
+   * @apiName NewUser
+   * @apiGroup User
+   *
+   * @apiParam {String} email Email of the new user
+   * @apiParam {String} name Name of the new user
+   * @apiParam {String} password Password of the new user
+   *
+   * @apiSuccess {String} message "Success!"
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Success"
+   * 	}
+   *
+   * @apiError DatabaseError The database encountered some sort of error.
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Database error",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError MailError The application encountered an error sending verification email
+   *
+   * @apiErrorExample {json} Mail Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Error sending email",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError FieldMissing There are missing fields
+   *
+   * @apiErrorExample {json} Missing Field:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "No email"
+   * 	}
+   *
+   * @apiErrorExample {json} Missing Field:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "No name"
+   * 	}
+   *
+   * @apiErrorExample {json} Missing Field:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "No password"
+   * 	}
+   */
   api.post("/user/new", function(req, res){
     if(req.body.email == ""){
       res.status(400).json({
@@ -340,7 +687,43 @@ module.exports = function(nano){
     }
   });
 
-  //Email veriication
+  /**
+   * @api {get} /user/new/:code Verify new user
+   * @apiName VerifyUser
+   * @apiGroup User
+   *
+   * @apiParam {String} code Code sent by email from /user/new
+   *
+   * @apiSuccess {String} message "Success!"
+   * @apiSuccess {String} token JWT
+   * @apiSuccess {Number} expiry Expiry in days
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Success",
+   *      "token" : JWT,
+   *      "expiry" : 1
+   * 	}
+   *
+   * @apiError DatabaseError The database encountered some sort of error.
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Database error",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError NotFound The specified code cannot be found
+   *
+   * @apiErrorExample {json} Not Found:
+   * 	HTTP/1.1 404 Not Found
+   * 	{
+   *	    "message" : "Code not found",
+   *      "data" : {err}
+   * 	}
+   */
   api.get("/user/new/:code", function(req, res){
     codes.get(req.params.code, function(err, body){
       if(err){
@@ -387,6 +770,52 @@ module.exports = function(nano){
     });
   });
 
+  /**
+   * @api {post} /login Login a user
+   * @apiName Login
+   * @apiGroup User
+   *
+   * @apiParam {String} email User email
+   * @apiParam {String} password User password
+   *
+   * @apiSuccess {String} message "Success!"
+   * @apiSuccess {String} token JWT
+   * @apiSuccess {Number} expiry Expiry in days
+   *
+   * @apiSuccessExample Success-Response:
+   * 	HTTP/1.1 200 OK
+   * 	{
+   *	    "message" : "Success",
+   *      "token" : JWT,
+   *      "expiry" : 1
+   * 	}
+   *
+   * @apiError DatabaseError The database encountered some sort of error.
+   *
+   * @apiErrorExample {json} Database Error:
+   * 	HTTP/1.1 500 Internal Server Error
+   * 	{
+   *	    "message" : "Database error",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError NotFound The specified user cannot be found
+   *
+   * @apiErrorExample {json} Not Found:
+   * 	HTTP/1.1 404 Not Found
+   * 	{
+   *	    "message" : "User not found",
+   *      "data" : {err}
+   * 	}
+   *
+   * @apiError IncorrectPassord The given password was incorrect
+   *
+   * @apiErrorExample {json} Incorrect Password:
+   * 	HTTP/1.1 400 Bad Request
+   * 	{
+   *	    "message" : "Incorrect password"
+   * 	}
+   */
   api.post("/login", function(req, res){
     users.get(req.body.email, function(err, body){
       if(err){
