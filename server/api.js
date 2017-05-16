@@ -831,7 +831,7 @@ module.exports = function(nano){
           });
         }
       }else{
-        if(body.password === req.body.passord){
+        if(body.password === req.body.password){
           res.status(200).json({
             message : "Success!",
             token : jwt.sign(body, config.secret),
