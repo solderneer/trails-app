@@ -4,7 +4,8 @@
   "description": "Geo-location based learning app to enhance fieldtrips and heritage trails",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build" : "npm install && node build.js"
   },
   "author": "",
   "license": "ISC",

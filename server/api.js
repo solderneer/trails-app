@@ -14,7 +14,7 @@ module.exports = function(nano){
   var multer = require("multer");
   var shortid = require("shortid");
   var async = require("async");
-  var nodemailer = require("nodemailer");
+  //var nodemailer = require("nodemailer");
 
   var storage = multer.diskStorage({
     destination : function(req, file, cb){
@@ -26,7 +26,7 @@ module.exports = function(nano){
   });
   var upload = multer({storage : storage});
 
-  var transporter = nodemailer.createTransport(config.smtp);
+  //var transporter = nodemailer.createTransport(config.smtp);
 
   var api = express.Router();
 
@@ -661,9 +661,9 @@ module.exports = function(nano){
                 from : config.smtp.auth.user,
                 to : req.body.email,
                 subject : 'Verify signup',
-                html : '<a>http://' + config.host + '/api/user/new/' + c_body._id'</a>'
+                html : '<a>http://' + config.host + '/api/user/new/' + c_body._id + '</a>'
               }
-              transporter.sendMail(mailOptions, function(error, info){
+              /*transporter.sendMail(mailOptions, function(error, info){
                   if (error) {
                     res.status(500).json({
                       message : "Error sending email",
@@ -674,7 +674,7 @@ module.exports = function(nano){
                       message : "Success!"
                     });
                   }
-              });
+              });*/
             }
           });
         }else{
