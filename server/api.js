@@ -14,7 +14,6 @@ module.exports = function(nano){
   var multer = require("multer");
   var shortid = require("shortid");
   var async = require("async");
-  //var nodemailer = require("nodemailer");
 
   var storage = multer.diskStorage({
     destination : function(req, file, cb){
@@ -25,8 +24,6 @@ module.exports = function(nano){
     }
   });
   var upload = multer({storage : storage});
-
-  //var transporter = nodemailer.createTransport(config.smtp);
 
   var api = express.Router();
 
@@ -581,11 +578,15 @@ module.exports = function(nano){
    * @apiParam {String} password Password of the new user
    *
    * @apiSuccess {String} message "Success!"
+   * @apiSuccess {String} token JWT
+   * @apiSuccess {Number} expiry Expiry in days
    *
    * @apiSuccessExample Success-Response:
    * 	HTTP/1.1 200 OK
    * 	{
-   *	    "message" : "Success"
+   *	    "message" : "Success",
+   *      "token" : JWT,
+   *      "expiry" : 1
    * 	}
    *
    * @apiError DatabaseError The database encountered some sort of error.
@@ -644,37 +645,23 @@ module.exports = function(nano){
       });
     }else{
       users.get(req.body.email, function(err, body){
-        if(err && err.error == "not_found"){
+        if(!body){
           var user_data = {
-            email : req.body.email,
             name : req.body.name,
             password : req.body.password
           };
-          codes.insert(user_data, shortid.generate, function(c_err, c_body){
+          users.insert(user_data, req.body.email, function(c_err, user){
             if(c_err){
               res.status(500).json({
                 message : "Database error",
                 data : c_err
               });
             }else{
-              var mail_data = {
-                from : config.smtp.auth.user,
-                to : req.body.email,
-                subject : 'Verify signup',
-                html : '<a>http://' + config.host + '/api/user/new/' + c_body._id + '</a>'
-              }
-              /*transporter.sendMail(mailOptions, function(error, info){
-                  if (error) {
-                    res.status(500).json({
-                      message : "Error sending email",
-                      data : error
-                    });
-                  }else{
-                    res.status(200).json({
-                      message : "Success!"
-                    });
-                  }
-              });*/
+              res.status(200).json({
+                message : "Success!",
+                token : jwt.sign(user, config.secret),
+                expiry : config.expiry
+              });
             }
           });
         }else{
@@ -685,89 +672,6 @@ module.exports = function(nano){
         }
       });
     }
-  });
-
-  /**
-   * @api {get} /user/new/:code Verify new user
-   * @apiName VerifyUser
-   * @apiGroup User
-   *
-   * @apiParam {String} code Code sent by email from /user/new
-   *
-   * @apiSuccess {String} message "Success!"
-   * @apiSuccess {String} token JWT
-   * @apiSuccess {Number} expiry Expiry in days
-   *
-   * @apiSuccessExample Success-Response:
-   * 	HTTP/1.1 200 OK
-   * 	{
-   *	    "message" : "Success",
-   *      "token" : JWT,
-   *      "expiry" : 1
-   * 	}
-   *
-   * @apiError DatabaseError The database encountered some sort of error.
-   *
-   * @apiErrorExample {json} Database Error:
-   * 	HTTP/1.1 500 Internal Server Error
-   * 	{
-   *	    "message" : "Database error",
-   *      "data" : {err}
-   * 	}
-   *
-   * @apiError NotFound The specified code cannot be found
-   *
-   * @apiErrorExample {json} Not Found:
-   * 	HTTP/1.1 404 Not Found
-   * 	{
-   *	    "message" : "Code not found",
-   *      "data" : {err}
-   * 	}
-   */
-  api.get("/user/new/:code", function(req, res){
-    codes.get(req.params.code, function(err, body){
-      if(err){
-        if(err.error == "not_found"){
-          res.status(404).json({
-            message : "Invalid code",
-            data : err
-          });
-        }else{
-          res.status(500).json({
-            message : "Database error",
-            data : err
-          });
-        }
-      }else{
-        var user_data = {
-          name : body.name,
-          password : body.password
-        };
-        users.insert(user_data, body.email, function(u_err, user){
-          if(u_err){
-            res.status(500).json({
-              message : "Database error",
-              data : u_err
-            });
-          }else{
-            codes.destroy(req.params.code, body._rev, function(d_err, success_body){
-              if(d_err){
-                res.status(500).json({
-                  message : "Database error",
-                  data : d_err
-                });
-              }else{
-                res.status(200).json({
-                  message : "Success",
-                  token : jwt.sign(body, config.secret),
-                  expiry : config.expiry
-                });
-              }
-            });
-          }
-        });
-      }
-    });
   });
 
   /**
